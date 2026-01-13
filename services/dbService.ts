@@ -39,18 +39,20 @@ export const dbService = {
   getLogs: (userId?: string): LogEntry[] => {
     const data = localStorage.getItem(LOGS_KEY);
     const logs: LogEntry[] = data ? JSON.parse(data) : [];
-    if (!userId) {
-      const active = dbService.getActiveUser();
-      return active ? logs.filter(l => l.userId === active.id) : [];
-    }
-    return logs.filter(l => l.userId === userId);
+    const active = dbService.getActiveUser();
+    if (!active) return [];
+    
+    const targetUserId = userId || active.id;
+    return logs.filter(l => l.userId === targetUserId);
   },
 
   saveLog: (entry: Omit<LogEntry, 'id' | 'timestamp' | 'userId'>): LogEntry => {
     const activeUser = dbService.getActiveUser();
     if (!activeUser) throw new Error("No active user");
 
-    const logs = dbService.getLogs();
+    const allDataRaw = localStorage.getItem(LOGS_KEY);
+    const allLogs: LogEntry[] = allDataRaw ? JSON.parse(allDataRaw) : [];
+    
     const newEntry: LogEntry = {
       ...entry,
       userId: activeUser.id,
@@ -58,9 +60,6 @@ export const dbService = {
       timestamp: new Date().toISOString(),
     };
     
-    // Check for global logs array from localStorage directly to ensure we have all users' data for persistence
-    const allDataRaw = localStorage.getItem(LOGS_KEY);
-    const allLogs: LogEntry[] = allDataRaw ? JSON.parse(allDataRaw) : [];
     allLogs.push(newEntry);
     localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
     return newEntry;
@@ -114,9 +113,7 @@ export const dbService = {
   },
 
   getDailyRoutineCompletion: (dateStr: string): string[] => {
-    const user = dbService.getActiveUser();
-    if (!user) return [];
-    const logs = dbService.getLogs(user.id);
+    const logs = dbService.getLogs();
     const routineLog = logs.find(l => l.category === Category.ROUTINE && l.date === dateStr);
     return routineLog ? routineLog.inputData.completedIds : [];
   },
