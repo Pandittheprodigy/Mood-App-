@@ -31,7 +31,9 @@ export default function App() {
     dbService.setActiveUser(null);
   };
 
-  const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: Role[] }) => {
+  // Fixed ProtectedRoute: Making children optional in the type definition to resolve TS compiler errors
+  // where it fails to recognize children passed via JSX when used within the Route 'element' prop.
+  const ProtectedRoute = ({ children, allowedRoles }: { children?: React.ReactNode, allowedRoles: Role[] }) => {
     if (!user) return <Navigate to="/login" />;
     if (!allowedRoles.includes(user.role)) return <Navigate to="/dashboard" />;
     return <>{children}</>;
