@@ -1,0 +1,7 @@
+{
+  "name": "Serenity Wellness Suite",
+  "description": "A minimal and classic personal wellness application for mood tracking, daily routines, and gratitude journaling, featuring AI-driven insights powered by Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
